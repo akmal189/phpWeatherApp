@@ -3,13 +3,15 @@
 namespace App\Livewire\Weather;
 
 use Livewire\Component;
-//use App\Services\DaDataService;
 use Illuminate\Support\Facades\Http;
 
 class WeatherSearch extends Component
 {
     public string $query = '';
+    public string $lat = '';
+    public string $lon = '';
     public array $suggestions = [];
+    public string $weatherInfo = '';
     
 
     public function updatedQuery()
@@ -43,7 +45,42 @@ class WeatherSearch extends Component
         $dadata = new \Dadata\DadataClient($token, $secret);
         $responseAddress = $dadata->clean("address", $this->query);
 
-        dd($responseAddress);
+        $this->lat = $responseAddress['geo_lat'] ?? '';
+        $this->lon = $responseAddress['geo_lon'] ?? '';
+        
+        $now = now();
+        $timestamp = $now->timestamp;
+        $start = now()->timestamp;
+
+        $params = implode(',', ['airTemperature' , 'cloudCover' , 'gust']);
+
+        $responseWeather = Http::withHeaders([
+            'Authorization' => env('STORMGLASS_API_KEY'),
+        ])->get('https://api.stormglass.io/v2/weather/point', [
+            'lat' => $this->lat,
+            'lng' => $this->lon,
+            'start' => $start,
+            'params' => $params
+        ]);
+
+        $weatherData = $responseWeather->json();
+
+        if (!isset($weatherData['hours']) || empty($weatherData['hours'])) {
+            return 'Нет данных о погоде';
+        }
+
+        $firstHour = $weatherData['hours'][0];
+
+        $temperature = $firstHour['airTemperature']['sg'] ?? null;
+        $cloud = $firstHour['cloudCover']['sg'] ?? null;
+        $gust = $firstHour['gust']['sg'] ?? null;
+
+        $weatherInfo = "Температура воздуха: " . ($temperature !== null ? $temperature . "°C" : 'н/д') . "<br>";
+        $weatherInfo .= "Облачность: " . ($cloud !== null ? $cloud . "%" : 'н/д') . "<br>";
+        $weatherInfo .= "Порывы ветра: " . ($gust !== null ? $gust . " м/с" : 'н/д') . "<br>";
+        
+
+        $this->weatherInfo = $weatherInfo;
     }
 
     public function render()
