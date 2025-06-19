@@ -1,7 +1,7 @@
 <div>
     <div style="max-width: 600px; margin: 20px auto;">
 
-        <h2>Погода по адресу</h2>
+        {{--<h2>Погода по адресу</h2>
 
         <form class="mb-4 flex">
             <div class="flex-auto">
@@ -13,7 +13,7 @@
                 >
                 @error('address') <span style="color:red;">{{ $message }}</span> @enderror
             </div>
-        </form>
+        </form> --}}
 
         @if(!empty($suggestions))
             <div class="bg-gray-100 p-4 rounded mb-4">

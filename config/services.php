@@ -19,7 +19,12 @@ return [
     ],
 
     'dadata' => [
-        'api_key' => env('DADATA_API_KEY'),
+        'api_key' => env('DADATA_API_KEY', 'default_api_key'),
+        'secret_key' => env('DADATA_API_SECRET', 'default_api_key'),
+    ],
+
+    'stormglass' => [
+        'api_key' => env('STORMGLASS_API_KEY', 'default_api_key'),
     ],
 
     'ses' => [
